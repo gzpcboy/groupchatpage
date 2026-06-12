@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GroupChat — Powered by GitHub Copilot</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>" />
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <span class="logo">💬 GroupChat</span>
+    <div class="usage-pill">Usage <span id="usage-total">$0.0000</span></div>
+    <div id="auth-section" style="display:flex;align-items:center;gap:10px">
+
+      <button id="signin-btn" class="btn btn-primary">
+        <svg height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+            -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+            .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+            -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+            s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82
+            1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
+            1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        Paste token below
+      </button>
+
+      <div id="user-info" style="display:none">
+        <img id="user-avatar" src="" alt="" width="28" height="28" />
+        <span id="user-name"></span>
+        <button id="signout-btn" class="btn btn-ghost btn-sm">Sign out</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Main ─────────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Error bar -->
+  <div id="error-bar" style="display:none">
+    <span id="error-text"></span>
+    <button id="error-dismiss" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- ── Setup panel ──────────────────────────────────────────────────────── -->
+  <section id="setup-panel">
+    <h1>Multi-model group chat</h1>
+
+    <section id="token-onboarding" class="token-onboarding" aria-labelledby="token-onboarding-title">
+      <div class="token-onboarding-copy">
+        <h2 id="token-onboarding-title">Connect Copilot token</h2>
+        <p>Paste a Copilot token or a refreshable auth bundle below. If you need one on Windows, paste the PowerShell script on this page directly into <strong>Windows PowerShell 5.1</strong>.</p>
+      </div>
+
+      <div class="token-onboarding-grid">
+        <div class="token-entry">
+          <div class="field-group">
+            <label for="token-input">Copilot token</label>
+            <textarea id="token-input" placeholder="Paste the Copilot token here"></textarea>
+          </div>
+          <p id="token-hint" class="token-hint">
+            The app saves your token in this browser and uses it directly for Copilot requests.
+          </p>
+          <div class="token-actions">
+            <button id="token-save-btn" class="btn btn-primary">Connect</button>
+          </div>
+        </div>
+
+        <div class="token-instructions">
+          <h3>Get a token in Windows PowerShell</h3>
+          <ol class="instruction-list">
+            <li>Open <strong>Windows PowerShell 5.1</strong>. If you are currently in PowerShell 7+, run <code>powershell.exe</code> first.</li>
+            <li>Paste the script below directly into the window and press Enter.</li>
+            <li>Approve GitHub device flow, then paste the printed Copilot token into the box on the left.</li>
+          </ol>
+          <pre id="windows-token-script" class="script-block"></pre>
+          <p class="modal-note">The script opens the verification URL, waits for approval, then prints a refreshable auth bundle so this browser can keep renewing Copilot tokens for longer sessions.</p>
+          <div class="token-actions">
+            <button id="token-script-copy-btn" class="btn btn-secondary">Copy PowerShell script</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="setup-form">
+      <div class="field-group">
+        <label>Conversation mode</label>
+        <div id="discussion-mode-group" class="mode-toggle" role="radiogroup" aria-label="Conversation mode">
+          <label class="mode-toggle-option">
+            <input type="radio" name="discussion-mode" value="debate" checked />
+            <span>Debate</span>
+          </label>
+          <label class="mode-toggle-option">
+            <input type="radio" name="discussion-mode" value="collaborative" />
+            <span>Collaborative</span>
+          </label>
+          <label class="mode-toggle-option">
+            <input type="radio" name="discussion-mode" value="free_discussion" />
+            <span>Free discussion</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label-row">
+          <label for="topic-input">Topic / question</label>
+          <button id="topic-wand-btn" type="button" class="btn btn-secondary btn-sm wand-btn" aria-label="Generate a random topic with Haiku">✨</button>
+        </div>
+        <textarea id="topic-input" placeholder="e.g. Is remote work better than in-office for software teams?"></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Participants</label>
+        <div id="checkbox-grid" class="checkbox-grid"></div>
+      </div>
+
+      <div class="field-group">
+        <div class="turns-row">
+          <label for="turns-input">Discussion turns</label>
+          <input id="turns-input" type="range" min="1" max="10" value="3" />
+          <span class="turns-value" id="turns-value">3</span>
+        </div>
+      </div>
+
+      <button id="start-btn" class="btn btn-primary" disabled>▶ Start Group Chat</button>
+    </div>
+  </section>
+
+  <!-- ── Chat section ─────────────────────────────────────────────────────── -->
+  <section id="chat-section" style="display:none">
+    <div id="chat-header">
+      <span id="chat-topic-label"></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="export-btn" class="btn btn-secondary btn-sm" disabled>Export .md</button>
+        <button id="stop-btn" class="btn btn-danger btn-sm" style="display:none">⏹ Stop</button>
+        <button id="new-chat-btn" class="btn btn-secondary btn-sm">← New Chat</button>
+      </div>
+    </div>
+
+    <div id="status-bar" style="display:none">
+      <div class="spinner"></div>
+      <span id="status-text"></span>
+    </div>
+
+    <div id="chat-messages"></div>
+
+    <div id="summary-panel" class="panel" style="display:none">
+      <div id="summary-panel-title" class="panel-title">📋 Summary</div>
+      <div id="summary-content" class="panel-content"></div>
+    </div>
+
+    <div id="judge-panel" class="panel judge" style="display:none">
+      <div id="judge-panel-title" class="panel-title">⚖️ Judgment</div>
+      <div id="judge-content" class="panel-content"></div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
